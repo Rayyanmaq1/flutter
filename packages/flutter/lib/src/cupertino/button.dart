@@ -26,18 +26,13 @@ const EdgeInsets _kBackgroundButtonPadding = EdgeInsets.symmetric(
 /// [EdgeInsets.zero], should be used to prevent clipping larger [child]
 /// widgets.
 ///
-/// {@tool dartpad}
-/// This sample shows produces an enabled and disabled [CupertinoButton] and
-/// [CupertinoButton.filled].
-///
-/// ** See code in examples/api/lib/cupertino/button/cupertino_button.0.dart **
-/// {@end-tool}
-///
 /// See also:
 ///
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/controls/buttons/>
 class CupertinoButton extends StatefulWidget {
   /// Creates an iOS-style button.
+    final bool shadow;
+  final Color shadowColor;
   const CupertinoButton({
     Key? key,
     required this.child,
@@ -49,6 +44,8 @@ class CupertinoButton extends StatefulWidget {
     this.borderRadius = const BorderRadius.all(Radius.circular(8.0)),
     this.alignment = Alignment.center,
     required this.onPressed,
+    this.shadow = false,
+     this.shadowColor= const Color(0xFFFFFFFF),
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
        assert(disabledColor != null),
        assert(alignment != null),
@@ -71,6 +68,8 @@ class CupertinoButton extends StatefulWidget {
     this.borderRadius = const BorderRadius.all(Radius.circular(8.0)),
     this.alignment = Alignment.center,
     required this.onPressed,
+    this.shadow = false,
+     this.shadowColor=const Color(0xFFFFFFFF),
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
        assert(disabledColor != null),
        assert(alignment != null),
@@ -144,7 +143,7 @@ class CupertinoButton extends StatefulWidget {
   bool get enabled => onPressed != null;
 
   @override
-  State<CupertinoButton> createState() => _CupertinoButtonState();
+  _CupertinoButtonState createState() => _CupertinoButtonState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -155,8 +154,8 @@ class CupertinoButton extends StatefulWidget {
 
 class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProviderStateMixin {
   // Eyeballed values. Feel free to tweak.
-  static const Duration kFadeOutDuration = Duration(milliseconds: 120);
-  static const Duration kFadeInDuration = Duration(milliseconds: 180);
+  static const Duration kFadeOutDuration = Duration(milliseconds: 10);
+  static const Duration kFadeInDuration = Duration(milliseconds: 100);
   final Tween<double> _opacityTween = Tween<double>(begin: 1.0);
 
   late AnimationController _animationController;
@@ -220,8 +219,8 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
       return;
     final bool wasHeldDown = _buttonHeldDown;
     final TickerFuture ticker = _buttonHeldDown
-        ? _animationController.animateTo(1.0, duration: kFadeOutDuration, curve: Curves.easeInOutCubicEmphasized)
-        : _animationController.animateTo(0.0, duration: kFadeInDuration, curve: Curves.easeOutCubic);
+        ? _animationController.animateTo(1.0, duration: kFadeOutDuration)
+        : _animationController.animateTo(0.0, duration: kFadeInDuration);
     ticker.then<void>((void value) {
       if (mounted && wasHeldDown != _buttonHeldDown)
         _animate();
@@ -268,7 +267,20 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
                 color: backgroundColor != null && !enabled
                   ? CupertinoDynamicColor.resolve(widget.disabledColor, context)
                   : backgroundColor,
+                  boxShadow: widget.shadow == true
+                      ? [
+                          BoxShadow(
+                            color: widget.shadowColor != null
+                                ? widget.shadowColor
+                                : Color(0xFFC5C5C5),
+                            offset: Offset(1.0, 3.0), //(x,y)
+                            blurRadius: 6.0,
+                            spreadRadius: 0,
+                          ),
+                        ]
+                      : []
               ),
+              
               child: Padding(
                 padding: widget.padding ?? (backgroundColor != null
                   ? _kBackgroundButtonPadding
